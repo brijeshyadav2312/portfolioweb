@@ -65,7 +65,7 @@ const About = () => {
               <div><label>Phone</label><input type='text' name='phone_number' placeholder='Your Phone Number'/></div>
               <div><label>Message*</label><textarea placeholder='Hii Drop Your Message Here' name='message' onChange={(e) => setMessage(e.target.value)}></textarea></div>
               <p style={{color:'red',fontSize:'0.8rem',textAlign:'center'}}>{err}</p>
-              <div style={{display:'flex',justifyContent:'center',marginRight:'5.5rem'}}><button type='submit' onClick={subMitHandler}>Submit</button></div>
+              <div style={{display:'flex',justifyContent:'center',marginRight:'5.5rem', width:'100%'}}><button type='submit' onClick={subMitHandler}>Submit</button></div>
             </form>
           </div>
       </div>
