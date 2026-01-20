@@ -1,40 +1,72 @@
 import React,{useEffect, useState} from 'react'
 import { InfoCircleFill } from 'react-bootstrap-icons'
 import Footer from './Footer'
-import emailjs from 'emailjs-com'
 import "aos/dist/aos.css"
 import AOS from 'aos';
 
 const About = () => {
-  const [name,setName] = useState("");
-  const [email,setEmail] = useState("");
-  const [message,setMessage] = useState("");
+
+  const [formData,setFormData] = useState({
+    name:"",
+    email:"",
+    phone:"",
+    message:""
+  });
+
   const [err, setErr] = useState("");
-
-  const subMitHandler = () => {
-    if(!name){
-      setErr("Name should not be empty")
-    }
-    else if(!email){
-      setErr("Email is mandatory")
-    }
-    else if(!message && message.length<16){
-      setErr("message should be atleast 16 character")
-    }
-  }
-
+  const [success,setSuccess] = useState("");
 
   useEffect(() => {
     AOS.init({duration:2000});
   }, [])
 
-  const sendMail = (e) =>{
-    e.preventDefault();
-    if(name!=="" && email!=="" && message!=="" && message.length>=16){
-      emailjs.sendForm('service_gzrajtb','template_govhtvj',e.target,'02lLweULljXLnDwgm').then(alert('Message Send successfully')).catch(err => console.log(err));
-      setErr("")
-    }
+  // handle input change
+  const handleChange = (e)=>{
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   }
+
+const sendMail = async (e) => {
+  e.preventDefault();
+  setErr("");
+  setSuccess("");
+  // let postURL = "http://localhost:5000/send-mail";
+  let postURL = "https://mail-server-f1kt.onrender.com/send-mail";
+
+  try {
+    const res = await fetch(postURL,{
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setErr(data.msg || "Something went wrong");
+      return;
+    }
+
+    if (data.success) {
+      setSuccess("Message sent successfully ✔");
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        message: ""
+      });
+    }
+
+  } catch (error) {
+    setErr("Server error. Try again later");
+  }
+};
+
 
 
   return (
@@ -44,34 +76,81 @@ const About = () => {
         <InfoCircleFill/>
         <p data-aos="fade-up">About Me</p><br/>
       </span>
+
       <div data-aos="fade-up">
-      Frontend Developer with 2.5+ years of experience working with jQuery, React, JavaScript, HTML5, and CSS3, Experienced in UI development, layout improvements, responsive design, and browser compatibility. I focus on writing clean code, understanding user requirements, and delivering stable frontend solutions. Comfortable working with cross-functional teams and interacting with clients to provide scalable and reliable features.
+      Frontend Developer with 2.5+ years of experience...
       </div>
-      {/* <div className='about'>
-          <p data-aos="fade-up" style={{fontSize:'2rem'}}><PhoneVibrate/>Hire Me</p><br/>
-          <div data-aos="fade-up"><span data-aos="fade-up">Im open for collaborations. I can make for you great web designs, 
-            portfolios, landing pages and much others at good price.</span></div>
-      </div> */}
+
       <Footer/>
+
       <div className='getInTouch'>
         <span className='getInTouchHeader' data-aos="fade-right">
           <p>GET IN TOUCH</p>
           <span>Say Hi! or contact me on social media</span>
         </span>
-          <div className='formItems'>
-            <form onSubmit={sendMail}>
-              <div><label>Name*</label><input type='text'name='name' placeholder='Your Name' onChange={(e) => setName(e.target.value)}/></div>
-              <div><label>Email*</label><input type='text' name='email' placeholder='Your Email' onChange={(e) => setEmail(e.target.value)}/></div>
-              <div><label>Phone</label><input type='text' name='phone_number' placeholder='Your Phone Number'/></div>
-              <div><label>Message*</label><textarea placeholder='Hii Drop Your Message Here' name='message' onChange={(e) => setMessage(e.target.value)}></textarea></div>
-              <p style={{color:'red',fontSize:'0.8rem',textAlign:'center'}}>{err}</p>
-              <div style={{display:'flex',justifyContent:'center',marginRight:'5.5rem', width:'100%'}}><button type='submit' onClick={subMitHandler}>Submit</button></div>
-            </form>
-          </div>
+
+        <div className='formItems'>
+          <form onSubmit={sendMail}>
+
+            <div>
+              <label>Name*</label>
+              <input 
+                type='text'
+                name='name'
+                value={formData.name}
+                placeholder='Your Name'
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <label>Email*</label>
+              <input 
+                type='text'
+                name='email'
+                value={formData.email}
+                placeholder='Your Email'
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <label>Phone</label>
+              <input 
+                type='text'
+                name='phone'
+                value={formData.phone}
+                placeholder='Your Phone Number'
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <label>Message*</label>
+              <textarea 
+                name='message'
+                value={formData.message}
+                placeholder='Hi! Drop your message here'
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* ERROR */}
+            {err && <p style={{color:'red',fontSize:'0.8rem',textAlign:'center'}}>{err}</p>}
+
+            {/* SUCCESS */}
+            {success && <p style={{color:'green',fontSize:'0.8rem',textAlign:'center'}}>{success}</p>}
+
+            <div style={{display:'flex',justifyContent:'center'}}>
+              <button type='submit'>Submit</button>
+            </div>
+
+          </form>
+        </div>
       </div>
       </div>
     </div>
   )
 }
 
-export default About
+export default About;
